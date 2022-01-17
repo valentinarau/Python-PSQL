@@ -1,4 +1,5 @@
-from tkinter import END, HIDDEN, Tk,Canvas,Frame,Label,Entry,Button,W,E,Listbox
+from cgitb import text
+from tkinter import END, HIDDEN, Tk, Canvas, Frame, Label, Entry, Button, W, E, Listbox
 import psycopg2
 
 
@@ -15,7 +16,7 @@ root = Tk()
 root.title("Students")
 
 # funcion para guardar 
-def save_new_student(connData,name,age,address):
+def save_new_student(connData, name, age, address):
     conn = connect_to_db_(connData)
     cursor = conn.cursor()
     query = '''INSERT INTO students(name,age,address) VALUES (%s,%s,%s)'''
@@ -55,6 +56,22 @@ def display_students_(connData):
     conn.commit()
     conn.close()
 
+def search_by(connData,id):
+    conn = connect_to_db_(connData)
+    cursor = conn.cursor()
+    query = '''SELECT * FROM students WHERE id = {0}'''.format(id)
+    cursor.execute(query,(id))
+    row = cursor.fetchone()
+
+    display_search_result(row)
+
+    conn.commit()
+    conn.close()
+
+def display_search_result(row):
+    listbox = Listbox(frame, width = 20, height = 1)
+    listbox.grid(row = 9, columnspan = 4, sticky = W + E)
+    listbox.insert(END, row)
 
 
 # instancia de Canvas
@@ -105,6 +122,9 @@ label.grid(row = 6, column = 0)
 
 id_search = Entry(frame)
 id_search.grid(row = 6, column = 1)
+
+button = Button(frame, text = 'Search', command = lambda: search_by(connData,id_search.get()))
+button.grid(row = 6, column = 2)
 
 
 display_students_(connData)
